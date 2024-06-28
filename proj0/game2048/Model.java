@@ -2,6 +2,7 @@ package game2048;
 
 import org.w3c.dom.html.HTMLTitleElement;
 
+import javax.swing.*;
 import java.util.Formatter;
 import java.util.Observable;
 
@@ -108,203 +109,176 @@ public class Model extends Observable {
      *    value, then the leading two tiles in the direction of motion merge,
      *    and the trailing tile does not.
      * */
+    // 封装成我的move函数，同时加上更新分数
+    public void myMove(int col, int row, int drow) {
+        Tile t = board.tile(col, row);
+        if(board.move(col, drow, t)) {
+            score += t.value() * 2;
+        }
+    }
+
+    // 只做这一件事，从某一个起点开始找到从上往下第一个存在tile的索引
+    public int findIndex(int[] arr, int start) {
+        for(int i = start; i < board.size(); i++) {
+            if(arr[i] != 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public boolean myEqual(int r1, int r2, int col) {
+        if(board.tile(col, r1) != null && board.tile(col, r2) != null) {
+            return board.tile(col, r1).value() == board.tile(col, r2).value();
+        }
+        return false;
+    }
+
+    // 最上面一排不存在数字
+    public void noneForHead(int[] arr, int cnt, int col) {
+        if(cnt == 1) {
+            int r = findIndex(arr, 0);
+            myMove(col, r, 3);
+        } else if(cnt == 2) {
+            int r1 = findIndex(arr, 0);
+            int r2 = findIndex(arr, r1+1);
+            if(myEqual(r1, r2, col)) {
+                myMove(col, r1, 3);
+                myMove(col ,r2, 3);
+            } else {
+                myMove(col, r2, 3);
+                myMove(col, r1, 2);
+            }
+        } else if(cnt == 3) {
+            boolean flag = false;
+            // 分为三种情况
+            // 1 & 2
+            int r0, r1, r2;
+            r0 = 0; r1 = 1; r2 = 2;
+            if(myEqual(r1, r2, col)) {
+                myMove(col, r2, 3);
+                myMove(col, r1, 3);
+                myMove(col, r0, 2);
+                flag = true;
+            }
+            // 1 & 0
+            if( !flag && myEqual(r1,r0, col)) {
+                myMove(col, r2, 3);
+                myMove(col, r1, 2);
+                myMove(col, r0, 2);
+            } else if(!flag && !myEqual(r1, r2, col)){
+                // 三个都不相等
+                myMove(col, r2, 3);
+                myMove(col, r1, 2);
+                myMove(col, r0, 1);
+            }
+        }
+    }
+    //最上面的一排存在数字
+    public boolean forHead(int[] arr, int cnt, int col) {
+        boolean flag = false;
+        // cnt == 1 为默认情况不进入分支
+        if(cnt == 2) {
+            int r1 =  findIndex(arr, 0);
+            if(myEqual(r1, 3, col)) {
+                myMove(col, r1, 3);
+                flag = true;
+            } else if (!myEqual(r1, 3, col) && r1 != 2){
+                myMove(col, r1, 2);
+                flag = true;
+            }  // 不需要改变的情况 1. 一个在3一个在2， 2.cnt == 1 的情况 flag 默认为false
+        } else if(cnt == 3) {
+            int r1 =findIndex(arr, 0);
+            int r2 = findIndex(arr, r1+1);
+            // 2 & 3
+            if(myEqual(r2, 3, col)) {
+                myMove(col, r2, 3);
+                myMove(col ,r1, 2);
+                flag = true;
+            } else if(!flag && myEqual(r1, r2, col)) { // 1 & 2
+                if(r2 == 2) {
+                    myMove(col, r1, 2);
+                } else {
+                    myMove(col, r2, 2);
+                    myMove(col ,r1, 2);
+                }
+                flag = true;
+
+            } else { // none
+                if(r2 == 2) {
+                    if(r1 == 1) {
+                        flag = false;
+                    } else {
+                        myMove(col, r1, 1);
+                        flag = true;
+                    }
+                } else {
+                    myMove(col, r1, 1);
+                    myMove(col, r2, 2);
+                    flag = true;
+                }
+            }
+        }else if(cnt == 4) {
+            // 3 & 2 | 2 & 1 | 1 & 0 | none   || 还有一个可能同时满足的  第一个和第三个
+            if(myEqual(2, 3, col)) {
+                // 同时满足的情况k
+                if(myEqual(1, 0, col)) {
+                    myMove(col, 2,3);
+                    myMove(col, 1,2);
+                    myMove(col, 0, 2);
+                    flag = true;
+                } else {
+                    myMove(col, 2, 3);
+                    myMove(col, 1,2);
+                    myMove(col, 0,1);
+                    flag = true;
+                }
+            } else { // situation 1 is not right
+                // situation 2
+                if(myEqual(2,1,  col)) {
+                    myMove(col, 1, 2);
+                    myMove(col, 0,1);
+                    flag =true;
+                }
+                if(myEqual(0, 1, col) && !flag) {
+                   myMove(col, 0,1);
+                   flag = true;
+                }
+            }
+
+        }
+        return flag;
+    }
+    public boolean arrMove(int[] arr, int cnt, int col) {
+        // 分成最上面一行是否存在值两种大情况
+        // 默认为true
+        boolean flag = true;
+        if(arr[3] == 0) {
+            noneForHead(arr, cnt, col);
+        } else {
+            flag = forHead(arr, cnt, col);
+        }
+        return flag;
+    }
+
     public boolean moveHelper(int col) {
         int cnt = 0;
+        int[] arr = new int[4];
         // 完全将情况分离化
-        for(int r = 0; r < board.size(); r++) {
-            if(board.tile(col, r) != null) {
+        for (int r = 0; r < board.size(); r++) {
+            arr[r] = 0;
+            if (board.tile(col, r) != null) {
                 // 记录这一列的存在的个数
+                arr[r] = board.tile(col, r).value();
                 cnt++;
             }
         }
+        if (cnt == 0) return false;
 
-        if(cnt == 0) {
-            return false; // 没有数字存在，返回false；
-        }
-
-        // 1. 当最上面一行不存在时
-        if(board.tile(col, 3) == null) {
-            // 开始将问题离散化
-            if(cnt == 1) {
-                for(int r = 0; r < board.size();r++) {
-                    if(board.tile(col, r) != null) {
-                        Tile t = board.tile(col, r);
-                        board.move(col, 3, t);
-                        return true;
-                    }
-                }
-            }
-            if(cnt == 2) {
-                for(int r1 = 0; r1 < board.size(); r1++) {
-                    if(board.tile(col, r1) != null) {
-                        // default r2 > r1
-                        int r2 = r1 + 1;
-                        // 找到第二个数字
-                        while(r2 < board.size()) {
-                            if(board.tile(col, r2) != null) {
-                                break;
-                            }
-                            r2++;
-                        }
-                        // 1. 相等的情况, 进行合并
-                        if(board.tile(col, r2).value() == board.tile(col, r1).value()) {
-                            Tile t1 = board.tile(col, r1);
-                            Tile t2 = board.tile(col, r2);
-                            board.move(col, 3, t2);
-                            board.move(col, 3, t1);
-                            // 加分
-                            score += board.tile(col, 3).value();
-                            return true;
-                        } else { // 2. 不相等的情况
-                            Tile t1 = board.tile(col, r1);
-                            Tile t2 = board.tile(col, r2);
-                            board.move(col, 3, t2);
-                            board.move(col, 2, t1);
-                            return true;
-                        }
-
-                    }
-                }
-            } else if (cnt == 3) {
-                // 1 & 2
-                if(board.tile(col, 1).value() == board.tile(col, 2).value()) {
-                    Tile t0 = board.tile(col, 0);
-                    Tile t1 = board.tile(col, 1);
-                    Tile t2 = board.tile(col, 2);
-                    board.move(col, 3, t1);
-                    board.move(col, 3, t2);
-                    board.move(col, 2, t0);
-                    //  合成了多少就加多少分
-                    score += board.tile(col, 3).value();
-                    return true;
-                } else if(board.tile(col, 1).value() == board.tile(col, 0).value()) { // 0 & 1
-                    Tile t0 = board.tile(col, 0);
-                    Tile t1 = board.tile(col, 1);
-                    Tile t2 = board.tile(col, 2);
-                    board.move(col, 2, t1);
-                    board.move(col, 3, t2);
-                    board.move(col, 2, t0);
-                    //  合成了多少就加多少分
-                    score += board.tile(col, 2).value();
-                    return true;
-                } else {
-                    // 一个都不相等
-                    Tile t0 = board.tile(col, 0);
-                    Tile t1 = board.tile(col, 1);
-                    Tile t2 = board.tile(col, 2);
-                    // 每一个都向上提一个位置
-                    board.move(col, 2, t1);
-                    board.move(col, 3, t2);
-                    board.move(col, 1, t0);
-                    return true; // 只要是有tile移动了就返回changed == true
-                }
-            }
-
-        }
-        // 2. 当最上面一行存在
-        else {
-            if(cnt == 1) {
-                // 无
-                return false;
-            } else if(cnt == 2) {
-                for(int r = 0; r < board.size(); r++) {
-                    if(board.tile(col, r) != null) {
-                        if(board.tile(col, r).value() == board.tile(col, 3).value()) {
-                            Tile t = board.tile(col,r);
-                            board.move(col, r, t);
-                            score += board.tile(col, 3).value();
-                            return true;
-                        } else if (r != 2){
-                            Tile t = board.tile(col, r);
-                            board.move(col, 2,t);
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-                }
-            } else if(cnt == 3) {
-                for(int r1 = 0; r1 < board.size(); r1++) {
-                    if(board.tile(col, r1)  != null) {
-                        for(int r2 = r1+1; r2 < board.size(); r2++) {
-                            if(board.tile(col, r2) != null) {
-                                if(board.tile(col, r2).value() == board.tile(col, 3).value()) {
-                                    Tile t1 = board.tile(col, r1);
-                                    Tile t2 = board.tile(col, r2);
-                                    board.move(col, 3, t2);
-                                    board.move(col, 2, t1);
-                                    //  合成了多少就加多少分
-                                    score += board.tile(col, 3).value();
-                                    return true;
-                                } else if(board.tile(col, r1).value() == board.tile(col, r2).value()) {
-                                    // move method 是否支持将移动到自己本身的位置
-                                    Tile t1 = board.tile(col, r1);
-                                    Tile t2 = board.tile(col, r2);
-                                    if(r2 == 2) {
-                                        board.move(col, 2, t1);
-                                    } else {
-                                        board.move(col, 2, t2);
-                                        board.move(col, 2, t1);
-                                        //  合成了多少就加多少分
-                                        score += board.tile(col, 2).value();
-                                    }
-                                    return true;
-                                } else { // 无相等的
-                                    Tile t1 = board.tile(col, r1);
-                                    Tile t2 = board.tile(col, r2);
-                                    // 还是内个问题 move method  !! r1 的重复没有处理
-                                    if (r2 != 2) {
-                                        board.move(col, 2, t2);
-                                        // r1 只能是 0
-                                        board.move(col, 1, t1);
-                                        return true;
-                                    } else {
-                                        if(r1 == 1) {
-                                            return false;
-                                        } else {
-                                            board.move(col, 1, t1);
-                                            return true;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } else if(cnt == 4) {
-                Tile t0 = board.tile(col, 0);
-                Tile t1 = board.tile(col, 1);
-                Tile t2 = board.tile(col, 2);
-                if(board.tile(col, 3).value() == board.tile(col, 2).value()) {
-                    board.move(col, 3, t2);
-                    score += board.tile(col, 3).value();
-                    if(board.tile(col, 1).value() == board.tile(col, 0).value()) {
-                        board.move(col, 2, t1);
-                        board.move(col, 2, t0);
-                        score += board.tile(col, 2).value();
-                    } else {
-                        board.move(col, 2, t1);
-                        board.move(col, 1, t0);
-                    }
-                    return true;
-                } else if(board.tile(col, 1).value() == board.tile(col, 2).value()) {
-                    board.move(col, 2, t1);
-                    board.move(col, 1, t0);
-                    score += board.tile(col, 2).value();
-                    return true;
-                } else if(board.tile(col, 1).value() == board.tile(col, 0).value()) {
-                    board.move(col, 1, t0);
-                    score += board.tile(col, 1).value();
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        }
-        return true;
+        boolean flag = false;
+        flag = arrMove(arr, cnt, col);
+        return flag;
     }
-
-
     // 这里的列和行位置互换了并且 列从最左边开始，行从最下面开始
     public boolean tilt(Side side) {
         // first sovle the -up side
