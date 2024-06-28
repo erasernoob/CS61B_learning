@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="javalib" type="kotlin.js">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/library-sp21/javalib" />
+      <root url="file://$PROJECT_DIR$/library-sp21" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/lab1" />
+    </SOURCES>
+    <jarDirectory url="file://$PROJECT_DIR$/library-sp21" recursive="false" />
+  </library>
+</component>
