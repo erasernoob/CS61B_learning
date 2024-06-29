@@ -14,6 +14,7 @@ public class IntListExercises {
             head.first += c;
             head = head.rest;
         }
+        head.first += c;
     }
 
     /**
@@ -50,12 +51,23 @@ public class IntListExercises {
      *  the first digit of x.
      */
     public static boolean firstDigitEqualsLastDigit(int x) {
+        int firstDigit = x;
         int lastDigit = x % 10;
-        while (x > 10) {
-            x = x / 10;
+        int tmp = x;
+        if(x < 10) {
+            return true;
+        } else {
+            int cnt = 0;
+            while(tmp != 0) {
+                tmp /= 10;
+                cnt++;
+            }
+            while(cnt != 1) {
+                firstDigit = firstDigit / 10;
+                cnt--;
+            }
         }
-        int firstDigit = x % 10;
-        return firstDigit == lastDigit;
+        return (firstDigit == lastDigit);
     }
 
     /**
@@ -72,11 +84,13 @@ public class IntListExercises {
         }
 
         boolean currElemIsPrime = Primes.isPrime(lst.first);
+        boolean changed = false;
 
         if (currElemIsPrime) {
             lst.first *= lst.first;
+            changed = true;
         }
-
-        return currElemIsPrime || squarePrimes(lst.rest);
+        squarePrimes(lst.rest);
+        return true;
     }
 }
