@@ -105,12 +105,4 @@ public class LinkedListDeque<BeepLord> {
             this.next  = next;
         }
     }
-
-    public static void main(String[] args) {
-        LinkedListDeque<Integer> Q = new LinkedListDeque<>(9);
-        Q.addFirst(0);
-        Q.addLast(8);
-        Q.printDeque();
-
-    }
 }
