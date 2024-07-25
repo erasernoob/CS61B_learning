@@ -5,7 +5,7 @@ import org.checkerframework.framework.qual.LiteralKind;
 import org.eclipse.jetty.server.HttpInput;
 
 /** Implement the Deque by using circular sentinel topology */
-public class LinkedListDeque<BeepLord> {
+public class LinkedListDeque<Item> implements Deque<Item> {
     private ListNode sentinel;
     private int size;
 
@@ -19,10 +19,20 @@ public class LinkedListDeque<BeepLord> {
     /** here in order to have a garbage value for sentinel's item what should do?
      *  ANSWER IS: make a Empty constructor func for the ListNode
      */
-    public LinkedListDeque(BeepLord x) {
+    public LinkedListDeque(Item x) {
         sentinel = new ListNode(x, null, null); // make the sentinel's item = the first one's item
         sentinel.next = new ListNode(x, sentinel, sentinel);
         sentinel.prev = sentinel.next;
+    }
+
+    public Item get(int index) {
+        int cnt = 0;
+        ListNode T = sentinel.next;
+        while(cnt != index) {
+            T = T.next;
+            cnt++;
+        }
+        return T.item;
     }
 
     public boolean isEmpty() {
@@ -33,7 +43,7 @@ public class LinkedListDeque<BeepLord> {
         return size;
     }
 
-    public void addLast(BeepLord item) {
+    public void addLast(Item item) {
         ListNode T = new ListNode(item);
         T.next = sentinel;
         T.prev = sentinel.prev;
@@ -42,33 +52,27 @@ public class LinkedListDeque<BeepLord> {
         size++;
     }
 
-    public void addFirst(BeepLord item){
+    public void addFirst(Item item){
         sentinel.next = new ListNode(item, sentinel, sentinel.next);
         size++;
     }
 
-    public BeepLord removeFirst() {
-        BeepLord tmp;
+    public void removeFirst(Item T) {
+        Item tmp;
         tmp = sentinel.next.item;
-        if(tmp == null) {
-            return null;
-        }
         sentinel.next = sentinel.next.next;
         sentinel.next.next.prev = sentinel;
         size--;
-        return  tmp;
+        T = tmp;
     }
 
-    public BeepLord removeLast() {
-        BeepLord tmp;
+    public void removeLast(Item T) {
+        Item tmp;
         tmp = sentinel.prev.item;
-        if(tmp == null) {
-            return null;
-        }
         sentinel.prev = sentinel.prev.prev;
         sentinel.prev.next = sentinel;
         size--;
-        return tmp;
+        T = tmp;
     }
 
     public void printDeque() {
@@ -85,7 +89,7 @@ public class LinkedListDeque<BeepLord> {
 
     /** the subclass won't use anything instances in this big class then it will be the static type */
     public class ListNode {
-        BeepLord item;
+        Item item;
         ListNode next;
         ListNode prev;
 
@@ -94,12 +98,12 @@ public class LinkedListDeque<BeepLord> {
             prev = null;
         }
 
-        public ListNode(BeepLord item) {
+        public ListNode(Item item) {
             this.item = item;
             next = prev = null;
         }
 
-        public ListNode(BeepLord x, ListNode prior, ListNode next) {
+        public ListNode(Item x, ListNode prior, ListNode next) {
             item = x;
             this.prev = prior;
             this.next  = next;

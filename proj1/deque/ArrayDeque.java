@@ -4,7 +4,7 @@ import afu.org.checkerframework.checker.oigj.qual.O;
 
 import java.awt.*;
 
-public class ArrayDeque<Item> {
+public class ArrayDeque<Item> implements Deque<Item> {
     public Item[] item;
     private int capacity;
     private int size;
@@ -67,14 +67,14 @@ public class ArrayDeque<Item> {
         capacity = cap;
     }
 
-    public Item removeLast() {
+    public void removeLast(Item T) {
         int num = ((nextLast - 1) + capacity) % capacity;
         Item x = item[num];
         item[num] = null;
         nextLast = num;
         size--;
         detectForRatio();
-        return x;
+        T = x;
     }
 
     public void detectForRatio() {
@@ -84,14 +84,14 @@ public class ArrayDeque<Item> {
         }
     }
 
-    public Item removeFirst() {
+    public void removeFirst(Item T) {
         int index = (nextFirst + 1) % capacity;
         Item x = item[index];
         item[index] = null;
         nextFirst = index;
         size--;
         detectForRatio();
-        return x;
+        T = x;
     }
 
     public boolean isEmpty() {
@@ -144,7 +144,7 @@ public class ArrayDeque<Item> {
     }
 
     public int size() {
-        return capacity;
+        return size;
     }
 
     public int getTheRealIndex(int first) {
