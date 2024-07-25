@@ -32,7 +32,7 @@ public class ArrayDequeTest {
         }
         int tmp;
         for(int i = 0; i < 16; i++) {
-            arr.removeFirst(tmp);
+            arr.removeFirst();
         }
     }
 
@@ -49,10 +49,10 @@ public class ArrayDequeTest {
         arr.addLast(7);
         arr.addFirst(0);
 
-        arr.removeLast(tmp);
-        arr.removeLast(tmp);
-        arr.removeLast(tmp);
-        arr.removeFirst(tmp);
+        arr.removeLast();
+        arr.removeLast();
+        arr.removeLast();
+        arr.removeFirst();
         assertArrayEquals(new Integer[]{1, 2, 3, -1}, arr.getTheSortArray());
     }
 
@@ -68,7 +68,7 @@ public class ArrayDequeTest {
             }
         }
         for(int i = 0; i < 16; i++) {
-            arr.removeLast(tmp);
+            arr.removeLast();
         }
     }
 
@@ -80,7 +80,7 @@ public class ArrayDequeTest {
             arr.addFirst(i);
         }
         for(int j = 16; j >= 0; --j) {
-            arr.removeLast(tmp);
+            arr.removeLast();
         }
     }
 

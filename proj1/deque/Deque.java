@@ -1,16 +1,12 @@
 package deque;
-
 public interface Deque<Item> {
-    public Item get(int index);
-    public void removeLast(Item T);
-    public void removeFirst(Item T);
-    public void addFirst(Item T);
-    public void addLast(Item T);
+    public void addFirst(Item item);
+    public void addLast(Item item);
+    public boolean isEmpty();
     public int size();
-    default boolean isEmpty() {
-        if(this.size() == 0) {
-            return true;
-        }
-        return false;
-    }
+    public void printDeque();
+    public Item removeFirst();
+    public Item removeLast();
+    public Item get(int index);
+
 }

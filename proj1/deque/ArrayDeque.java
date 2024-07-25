@@ -67,14 +67,15 @@ public class ArrayDeque<Item> implements Deque<Item> {
         capacity = cap;
     }
 
-    public void removeLast(Item T) {
+    public Item removeLast() {
         int num = ((nextLast - 1) + capacity) % capacity;
         Item x = item[num];
         item[num] = null;
         nextLast = num;
         size--;
         detectForRatio();
-        T = x;
+        return x;
+
     }
 
     public void detectForRatio() {
@@ -84,14 +85,14 @@ public class ArrayDeque<Item> implements Deque<Item> {
         }
     }
 
-    public void removeFirst(Item T) {
+    public Item removeFirst() {
         int index = (nextFirst + 1) % capacity;
         Item x = item[index];
         item[index] = null;
         nextFirst = index;
         size--;
         detectForRatio();
-        T = x;
+        return x;
     }
 
     public boolean isEmpty() {
