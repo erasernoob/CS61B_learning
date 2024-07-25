@@ -1,9 +1,11 @@
 package deque;
 
+import afu.org.checkerframework.checker.oigj.qual.O;
+
 import java.awt.*;
 
-public class ArrayDeque<Gdle> {
-    public Gdle[] item;
+public class ArrayDeque<Item> {
+    public Item[] item;
     private int capacity;
     private int size;
     private int nextFirst;
@@ -12,18 +14,22 @@ public class ArrayDeque<Gdle> {
     /** NOTE: when setting the nextFirst and nextLast index for the first time
      *  set them the initial value to adjacent to make sure there is no "fake full" phenomenon*/
     public ArrayDeque() {
-        item = (Gdle []) new Object[8];
+        item = (Item []) new Object[8];
         capacity = item.length;
+        // 这里的两个索引的值，是要求可以随机分配的吗？
         nextFirst = 0;
         nextLast = 1;
         size = 0;
     }
 
+
+    // 以下都是计算更新索引的值的
     public void conFirst() {
-        while(nextFirst >= capacity) {
+        while(nextFirst >= capacity || item[nextFirst] != null) {
             nextFirst = ((nextFirst - 1) + capacity) % capacity;
         }
     }
+
     public void conLast() {
         while(item[nextLast] != null || nextFirst >= capacity) {
             nextLast = (nextLast + 1) % capacity;
@@ -31,7 +37,7 @@ public class ArrayDeque<Gdle> {
     }
 
     /** Get the elements by index */
-    public Gdle get(int index) {
+    public Item get(int index) {
         return item[index];
     }
 
@@ -40,33 +46,30 @@ public class ArrayDeque<Gdle> {
     }
 
     /** usage too low to shrink the size to upper the usageRatio */
+    // 缩减大小的问题在于，如何进行对两个左右索引的重新分配，缩减后大小的分配
     public void shrinkSize() {
-        int cap = capacity / 4;
-        Gdle[] a = (Gdle []) new Object[cap];
-        int first = nextFirst;
-        int cnt = 0;
-        for(int i = 0; i < capacity; i++) {
-            first = getTheRealIndex(first);
-            if(cnt == size) {
-                break;
-            }
-            if(item[first] == null) {
-                continue;
-            }
+        int cap = capacity / 4 + 1;
+        Item[] a = (Item []) new Object[cap];
 
-            a[i] = item[first];
-            cnt++;
+        int first = (nextFirst + 1) % capacity;
+        int index = 0;
+        while(first != nextLast) {
+            if(item[first] != null) {
+                a[index++] = item[first];
+            }
+            first = (first + 1) % capacity;
         }
+
+        // 思路：将后面的值直接接在前一个队列的队尾，以当前这种特殊的情况，将两索引都指向多分配出来的那个box
+
         item = a;
+        nextFirst = nextLast = a.length-1;
         capacity = cap;
-        conFirst();
-        conLast();
     }
 
-
-    public Gdle removeLast() {
+    public Item removeLast() {
         int num = ((nextLast - 1) + capacity) % capacity;
-        Gdle x = item[num];
+        Item x = item[num];
         item[num] = null;
         nextLast = num;
         size--;
@@ -81,10 +84,11 @@ public class ArrayDeque<Gdle> {
         }
     }
 
-    public Gdle removeFirst() {
-        Gdle x = item[nextFirst+1];
-        item[nextFirst + 1] = null;
-        nextFirst = (nextFirst + 1) % capacity;
+    public Item removeFirst() {
+        int index = (nextFirst + 1) % capacity;
+        Item x = item[index];
+        item[index] = null;
+        nextFirst = index;
         size--;
         detectForRatio();
         return x;
@@ -97,7 +101,7 @@ public class ArrayDeque<Gdle> {
     public boolean isFull() {
         return nextFirst == nextLast || size == capacity;
     }
-    public void addLast(Gdle x) {
+    public void addLast(Item x) {
         if(isFull()) {
             resize(capacity * 2);
         }
@@ -106,20 +110,31 @@ public class ArrayDeque<Gdle> {
         conLast();
     }
 
-    public void printDeque() {
-        int first = nextFirst;
-        for(int i = 0; i < capacity; i++) {
-            first = getTheRealIndex(first);
-            if(item == null) {
-                continue;
+    public Item[] getTheSortArray() {
+        Item[] a = (Item[]) new Object[size];
+        int first = (nextFirst + 1) % capacity;
+        int index = 0;
+        while(first != nextLast) {
+            if(item[first] != null) {
+                a[index++] = item[first];
             }
-            System.out.print(item[first]);
-            System.out.print(" ");
+            first = (first + 1) % capacity;
+        }
+        return a;
+    }
+
+    public void printDeque() {
+        int first = (nextFirst + 1) % capacity;
+        while(first != nextLast) {
+            if(item[first] != null) {
+                System.out.print(item[first] + " ");
+            }
+            first = (first + 1) % capacity;
         }
         System.out.println();
     }
 
-    public void addFirst(Gdle x) {
+    public void addFirst(Item x) {
         if(isFull()) {
             resize(capacity * 2);
         }
@@ -139,7 +154,7 @@ public class ArrayDeque<Gdle> {
     /** How to do this correctly >>>>>>>>>>>>>>>>>>
      * Also need to change the index of the two nextfirst and the nextlast*/
     public void resize(int cap) {
-        Gdle[] a = (Gdle []) new Object[cap];
+        Item[] a = (Item []) new Object[cap];
         int first = nextFirst;
         for(int i = 0; i < capacity; i++) {
             first = getTheRealIndex(first);

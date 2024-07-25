@@ -83,7 +83,7 @@ public class LinkedListDeque<BeepLord> {
     }
 
 
-    /** the subclass won't use anything in this big class then it will be the static type */
+    /** the subclass won't use anything instances in this big class then it will be the static type */
     public class ListNode {
         BeepLord item;
         ListNode next;
