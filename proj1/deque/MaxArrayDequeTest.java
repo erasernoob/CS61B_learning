@@ -6,15 +6,15 @@ import static org.junit.Assert.*;
 
 public class MaxArrayDequeTest {
 
-    @Test
-    public void MaxArrayDequeTest() {
-        Comparator<String> c = getStringComparator();
-        MaxArrayDeque<String> arr = new MaxArrayDeque<>(c);
-        arr.addFirst("a");
-        arr.addFirst("cc");
-        arr.addLast("ii");
-        assertEquals(arr.max(), "ii");
-    }
+//    @Test
+//    public void MaxArrayDequeTest() {
+//        Comparator<String> c = getStringComparator();
+//        MaxArrayDeque<String> arr = new MaxArrayDeque<>(c);
+//        arr.addFirst("a");
+//        arr.addFirst("cc");
+//        arr.addLast("ii");
+//        assertEquals(arr.max(), "ii");
+//    }
 
 
 

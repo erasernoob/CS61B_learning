@@ -1,10 +1,12 @@
 package deque;
 
 import afu.org.checkerframework.checker.oigj.qual.O;
+import org.apache.commons.collections.iterators.AbstractIteratorDecorator;
 
 import java.awt.*;
+import java.util.Iterator;
 
-public class ArrayDeque<Item> implements Deque<Item> {
+public class ArrayDeque<Item> implements Deque<Item> ,Iterable<Item> {
     public Item[] item;
     private int capacity;
     private int size;
@@ -17,6 +19,15 @@ public class ArrayDeque<Item> implements Deque<Item> {
         item = (Item []) new Object[8];
         capacity = item.length;
         // 这里的两个索引的值，是要求可以随机分配的吗？
+        nextFirst = 0;
+        nextLast = 1;
+        size = 0;
+    }
+
+    public ArrayDeque(int capacity) {
+        item = (Item []) new Object[capacity];
+        // 这里的两个索引的值，是要求可以随机分配的吗？
+        this.capacity = capacity;
         nextFirst = 0;
         nextLast = 1;
         size = 0;
@@ -167,4 +178,46 @@ public class ArrayDeque<Item> implements Deque<Item> {
         conLast();
     }
 
+    /** Judge if the Object is the Deque and equal to the this one */
+    public boolean equals(Object o) {
+        // 1. the self situation
+        if(this == o) {
+            return true;
+        }
+        // Judge if it is the Deque
+        if(o instanceof ArrayDeque ourDeque) { // if it is the Deque
+            if(ourDeque.size() != this.size()) {
+                return false;
+            }
+            for(int i = 0; i < capacity; i++) {
+                if (this.item[i] == null && ourDeque.item[i] != null ||
+                        this.item[i] != null && ourDeque.item[i] == null || this.item[i] != ourDeque.item[i])
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    private class arrayDequeIterator implements Iterator<Item> {
+        public int widpos;
+
+        public arrayDequeIterator() {
+            widpos = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return widpos < size;
+        }
+
+        @Override
+        public Item next() {
+            return item[widpos++];
+        }
+    }
+
+    @Override
+    public Iterator<Item> iterator() {
+        return new arrayDequeIterator();
+    }
 }

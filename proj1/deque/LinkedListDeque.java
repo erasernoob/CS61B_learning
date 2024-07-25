@@ -16,6 +16,7 @@ public class LinkedListDeque<Item> implements Deque<Item> {
         sentinel.prev = sentinel;
     }
 
+
     /** here in order to have a garbage value for sentinel's item what should do?
      *  ANSWER IS: make a Empty constructor func for the ListNode
      */

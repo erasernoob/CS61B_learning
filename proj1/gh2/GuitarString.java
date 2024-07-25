@@ -1,7 +1,13 @@
 package gh2;
 
 // TODO: uncomment the following import once you're ready to start this portion
-// import deque.Deque;
+ import deque.ArrayDeque;
+
+ import java.util.HashSet;
+ import java.util.Set;
+
+ import deque.Deque;
+ import deque.LinkedListDeque;
 // TODO: maybe more imports
 
 //Note: This file will not compile until you complete the Deque implementations
@@ -14,7 +20,7 @@ public class GuitarString {
 
     /* Buffer for storing sound data. */
     // TODO: uncomment the following line once you're ready to start this portion
-    // private Deque<Double> buffer;
+     private Deque<Double> buffer;
 
     /* Create a guitar string of the given frequency.  */
     public GuitarString(double frequency) {
@@ -22,6 +28,11 @@ public class GuitarString {
         //       cast the result of this division operation into an int. For
         //       better accuracy, use the Math.round() function before casting.
         //       Your should initially fill your buffer array with zeros.
+        int capacity = (int)Math.round(SR / frequency);
+        buffer = new ArrayDeque<Double>(capacity);
+        for(int i = 0; i < capacity; i++) {
+            buffer.addLast(0.0);
+        }
     }
 
 
@@ -30,6 +41,17 @@ public class GuitarString {
         // TODO: Dequeue everything in buffer, and replace with random numbers
         //       between -0.5 and 0.5. You can get such a number by using:
         //       double r = Math.random() - 0.5;
+        int size = buffer.size();
+        Set<Double> numSet = new HashSet<Double>(); // for the not difference case
+        for(int i = 0; i < size; i++) {
+            buffer.removeFirst();
+            double r = Math.random() - 0.5; //
+            while(numSet.contains(r)) {
+                r = Math.random() - 0.5;
+            }
+            numSet.add(r);
+            buffer.addFirst(r);
+        }
         //
         //       Make sure that your random numbers are different from each
         //       other. This does not mean that you need to check that the numbers
@@ -44,12 +66,23 @@ public class GuitarString {
         // TODO: Dequeue the front sample and enqueue a new sample that is
         //       the average of the two multiplied by the DECAY factor.
         //       **Do not call StdAudio.play().**
+        double p = buffer.removeFirst();
+        double q = buffer.removeFirst();
+        buffer.addFirst(q);
+        double ret = 0.966 * 0.5 * (p + q);
+        double num = Math.random();
+        if(num <= 0.5) {
+            ret = -ret;
+        }
+        buffer.addLast(ret);
     }
 
     /* Return the double at the front of the buffer. */
     public double sample() {
         // TODO: Return the correct thing.
-        return 0;
+        double p = buffer.removeFirst();
+        buffer.addFirst(p);
+        return p;
     }
 }
     // TODO: Remove all comments that say TODO when you're done.
